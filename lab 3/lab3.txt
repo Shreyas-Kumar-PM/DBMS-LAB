@@ -1,0 +1,272 @@
+
+1. Create the above tables by properly specifying the primary keys and the foreign 
+keys. 
+
+SQL> create table PERSON(driver_id varchar(30),name varchar(50),address varchar(100), primary key(driver_id));
+
+Table created.
+
+SQL> create table CAR(regno varchar(20),model varchar(30),Year int,primary key(regno));
+
+Table created.
+
+SQL> create table ACCIDENT(report_number int,accd_date date,location varchar(50),primary key(report_number));
+
+Table created.
+
+create table OWNS (driver_id varchar(30),regno varchar(20),foreign key(driver_id) references PERSON,foreign key(reg
+no) references CAR);
+
+Table created.
+
+create table PARTICIPATED(driver_id varchar(30),regno varchar(20),report_number int,damage_amount int,foreign key(driver_id) references PERSON,foreign key(regno) references CAR,foreign key(report_number) references ACCIDENT);
+
+Table created.
+
+
+2.Enter at least five tuples for each relation.
+
+SQL> insert into PERSON values('230953304','Soham','Delhi');
+
+1 row created.
+SQL> insert into PERSON values('230953300','Shreyas','Mangalore');
+
+1 row created.
+
+SQL> insert into PERSON values('230953301','Aditya','Bangalore');
+
+1 row created.
+
+SQL> insert into PERSON values('230953302','Rajesh','Chennai');
+
+1 row created.
+
+SQL> insert into PERSON values('230953303','Vishesh','Calicut');
+
+1 row created.
+
+SQL> insert into PERSON values('230953304','Soham','Delhi');
+
+1 row created.
+
+SQL> insert into CAR values('TN013B1975','XUV700',2000);
+
+1 row created.
+
+SQL> insert into CAR values('TN013B2004','XUV700',2004);
+
+1 row created.
+
+SQL> insert into CAR values('TN013B2000','KUV300',2003);
+
+1 row created.
+
+SQL> insert into CAR values('PY013B2000','KUV300',2003);
+
+1 row created.
+
+SQL> insert into CAR values('PY013B2002','X-series',2023);
+
+1 row created.
+SQL> insert into accident values(20034,'11-JAN-2023','chennai');
+
+1 row created.
+
+SQL> insert into accident values(20036,'11-FEB-2013','chennai');
+
+1 row created.
+
+SQL> insert into accident values(20026,'09-JAN-2025','MANIPAL');
+
+1 row created.
+
+SQL> insert into accident values(20045,'12-JAN-2025','UDUPI');
+
+1 row created.
+
+SQL> insert into accident values(20025,'12-NOV-2020','BANGALORE');
+
+1 row created.
+
+SQL> insert into owns values('230953300','TN013B1975');
+
+1 row created.
+
+SQL> insert into owns values('230953301','TN013B2004');
+
+1 row created.
+
+SQL> insert into owns values('230953302','TN013B2000');
+
+1 row created.
+
+SQL> insert into owns values('230953303','PY013B2000');
+
+1 row created.
+
+SQL> insert into owns values('230953304','PY013B2002');
+
+1 row created.
+SQL> insert into participated values('230953300','TN013B1975','20036',10000);
+
+1 row created.
+
+SQL> insert into participated values('230953300','TN013B1975','20026',50000);
+
+1 row created.
+
+SQL> insert into participated values('230953301','TN013B2004','20045',60000);
+
+1 row created.
+
+SQL> insert into participated values('230953301','TN013B2004','20034',70000);
+
+1 row created.
+
+SQL> insert into participated values('230953301','TN013B2004','20025',5000);
+
+1 row created.
+SQL> select * from person;
+
+DRIVER_ID NAME       ADDRESS
+--------- ---------- ----------
+230953300 Shreyas    Mangalore
+230953301 Aditya     Bangalore
+230953302 Rajesh     Chennai
+230953303 Vishesh    Calicut
+230953304 Soham      Delhi
+
+SQL> select * from car;
+
+REGNO      MODEL            YEAR
+---------- ---------- ----------
+TN013B1975 XUV700           2000
+TN013B2004 XUV700           2004
+TN013B2000 KUV300           2003
+PY013B2000 KUV300           2003
+PY013B2002 X-series         2023
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- ----------
+        20034 11-JAN-23 chennai
+        20036 11-FEB-13 chennai
+        20026 09-JAN-25 MANIPAL
+        20045 12-JAN-25 UDUPI
+        20025 12-NOV-20 BANGALORE
+
+SQL> select * from owns;
+
+DRIVER_ID  REGNO
+---------- ----------
+230953300  TN013B1975
+230953301  TN013B2004
+230953302  TN013B2000
+230953303  PY013B2000
+230953304  PY013B2002
+
+SQL> select * from participated;
+
+DRIVER_ID                      REGNO                REPORT_NUMBER DAMAGE_AMOUNT
+------------------------------ -------------------- ------------- -------------
+230953300                      TN013B1975                   20036         10000
+230953300                      TN013B1975                   20026         50000
+230953301                      TN013B2004                   20045         60000
+230953301                      TN013B2004                   20034         70000
+230953301                      TN013B2004                   20025          5000
+
+3.Update the damage amount to 25000 for the car with a specific reg. no in a 
+PARTICIPATED table with report number 12. 
+
+SQL> update participated set damage_amount=25000 where report_number=20034;
+
+1 row updated.
+
+SQL> select * from participated;
+
+DRIVER_ID  REGNO      REPORT_NUMBER DAMAGE_AMOUNT
+---------- ---------- ------------- -------------
+230953300  TN013B1975         20036         10000
+230953300  TN013B1975         20026         50000
+230953301  TN013B2004         20045         60000
+230953301  TN013B2004         20034         25000
+230953301  TN013B2004         20025          5000
+
+4.Delete the accident and related information that took place in a specific year.   
+
+SQL> delete from participated where report_number=(select report_number from accident where extract(year from accd_date)=2013);
+
+1 row deleted.
+
+SQL> select * from participated;
+
+DRIVER_ID  REGNO      REPORT_NUMBER DAMAGE_AMOUNT
+---------- ---------- ------------- -------------
+230953300  TN013B1975         20026         50000
+230953301  TN013B2004         20045         60000
+230953301  TN013B2004         20034         25000
+230953301  TN013B2004         20025          5000
+
+
+SQL> delete from accident where extract(year from accd_date)=2013;
+
+1 row deleted.
+
+SQL> select * from accident;
+
+REPORT_NUMBER ACCD_DATE LOCATION
+------------- --------- ----------
+        20034 11-JAN-23 chennai
+        20026 09-JAN-25 MANIPAL
+        20045 12-JAN-25 UDUPI
+        20025 12-NOV-20 BANGALORE
+
+5.Alter table to add and delete an attribute. 
+
+SQL> alter table person add gender varchar(6);
+
+Table altered.
+SQL> select *from person;
+
+DRIVER_ID NAME       ADDRESS    GENDER
+--------- ---------- ---------- ------
+230953300 Shreyas    Mangalore
+230953301 Aditya     Bangalore
+230953302 Rajesh     Chennai
+230953303 Vishesh    Calicut
+230953304 Soham      Delhi
+
+SQL> alter table car drop column model;
+
+Table altered.
+SQL> select * from car;
+
+REGNO            YEAR
+---------- ----------
+TN013B1975       2000
+TN013B2004       2004
+TN013B2000       2003
+PY013B2000       2003
+PY013B2002       2023
+
+6.Alter table to add Check constraint
+
+SQL> alter table participated add constraint damage_check check(damage_amount>=5000);
+
+Table altered.
+
+SQL> update participated set damage_amount=3000 where report_number=20025;
+update participated set damage_amount=3000 where report_number=20025
+*
+ERROR at line 1:
+ORA-02290: check constraint (CCE230953300.DAMAGE_CHECK) violated
+
+
+
+
+
+
+
+
+

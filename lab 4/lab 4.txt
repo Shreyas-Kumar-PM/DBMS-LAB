@@ -1,0 +1,56 @@
+(1)-> Find the total number of people who owned cars that were involved in accidents in 
+2008. 
+
+SQL> select count(distinct driver_id) from participated natural join owns where report_number in (select a.report_number from accident a where extra
+ct(year from a.accd_date)=2008);
+
+COUNT(DISTINCTDRIVER_ID)
+------------------------
+                       1
+
+
+(2)->Find the number of accidents in which cars belonging to a specific model were 
+involved. 
+
+SQL> select count(report_number),model from participated natural join car group by model;
+
+COUNT(REPORT_NUMBER) MODEL
+-------------------- -----
+                   1 Audi
+                   1 Creta
+                   3 Nano
+
+(3)->Produce a listing with header as OWNER_NAME, No. of Accidents, and Total 
+Damage Amount in a descending order on total damage.
+
+SQL> SELECT pe.name AS OWNER_NAME, COUNT(p.report_number) AS No_of_Accidents, SUM(p.damage_amount) AS Total_Damage_Amount
+  2  FROM PERSON pe, OWNS o, PARTICIPATED p
+  3  WHERE pe.driver_id = o.driver_id
+  4    AND o.regno = p.regno
+  5  GROUP BY pe.name
+  6  ORDER BY Total_Damage_Amount DESC;
+
+OWNER_NAME NO_OF_ACCIDENTS TOTAL_DAMAGE_AMOUNT
+---------- --------------- -------------------
+Aditya                   3               90000
+Shreyas                  1               50000
+Soham                    1               26000
+
+
+(4)->List the Owners who made more than 2 accidents in a year. 
+
+SQL> select name from person natural join participated join accident using(report_number) group by(name,extract(year from accd_date)) having count(driver_id)>=2;
+
+NAME
+----------
+Soham
+
+(5)->List the owners who are not involved in any accident. 
+
+SQL> select name from person where person.driver_id not in(select driver_id from participated);
+
+NAME
+----------
+Rajesh
+Vishesh
+
