@@ -1,0 +1,270 @@
+(1)->Create the above tables by properly specifying the primary keys and the 
+foreign keys. 
+
+SQL> create table STUDENT(regno varchar(10),name varchar(10),major varchar(10),bdate date,primary key(regno));
+
+SQL> create table COURSE(course int,cname varchar(10),dept varchar(10),primary key(course));
+
+Table created.
+
+SQL> create table TEXT(book_isbn int,booktitle varchar(10),publisher varchar(10),author varchar(10),primary key(book_isbn));
+
+Table created.
+
+SQL> create table ENROLL(regno varchar(20),course int,sem int,book_isbn int,foreign key(regno) references student,foreign key(course) references course,foreign key(book_isbn) references text,primary key(regno,course,book_isbn));
+
+Table created.
+
+SQL> create table BOOK_ADOPTION(course int,sem int,book_isbn int,foreign key(course) references course,foreign key(book_isbn) references text,primary key(course,book_isbn));
+
+Table created.
+
+(2)->Enter at least five tuples for each relation. 
+
+SQL> insert into student values('230953300','Shreyas','CS','11-NOV-2004');
+
+1 row created.
+
+SQL> insert into student values('230953301','Aditya','CS','12-DEC-2004');
+
+1 row created.
+
+SQL> insert into student values('230953302','Vishesh','BIO','12-JAN-2004');
+
+1 row created.
+
+SQL> insert into student values('230953303','Veer','BIO','15-JAN-2004');
+
+1 row created.
+
+SQL> insert into student values('230953304','Arnav','AERO','15-MAR-2004');
+
+1 row created.
+
+SQL> select * from student;
+
+REGNO      NAME       MAJOR      BDATE
+---------- ---------- ---------- ---------
+230953300  Shreyas    CS         11-NOV-04
+230953301  Aditya     CS         12-DEC-04
+230953302  Vishesh    BIO        12-JAN-04
+230953303  Veer       BIO        15-JAN-04
+230953304  Arnav      AERO       15-MAR-04
+
+SQL> insert into course values(1700,'DBMS','ICT');
+
+1 row created.
+
+SQL> insert into course values(1701,'OS','ICT');
+
+1 row created.
+
+SQL> insert into course values(1702,'DAA','ICT');
+
+1 row created.
+
+SQL> insert into course values(1703,'SS','ENI');
+
+1 row created.
+
+SQL> insert into course values(1704,'THERMO','MECH');
+
+1 row created.
+
+SQL> select * from course;
+
+    COURSE CNAME      DEPT
+---------- ---------- ----------
+      1700 DBMS       ICT
+      1701 OS         ICT
+      1702 DAA        ICT
+      1703 SS         ENI
+      1704 THERMO     MECH
+
+SQL> insert into text values(1230,'P Patel','IT SCIENCE','PUSTAK ENTERPRISES');
+
+1 row created.
+
+SQL> insert into text values(1231,'J S Katre','IT CODING TECHNIQUES','PUSTAK ENTERPRISES');
+
+1 row created.
+
+SQL> insert into text values(1232,'M A RAMA','INTERNETTECHNOLOGIES','PUSTAK ENTERPRISES');
+
+1 row created.
+
+SQL> insert into text values(1233,'Mahesh M','CLOUD COMPUTING','SAPNA ENTERPRISES');
+
+1 row created.
+
+SQL> insert into text values(1234,'PURVA R','INTELLIGENCE SYSTEM','SAPNA ENTERPRISES');
+
+1 row created.
+
+SQL> select * from text;
+
+ BOOK_ISBN AUTHOR     BOOKTITLE            PUBLISHER
+---------- ---------- -------------------- --------------------
+      1230 P Patel    IT SCIENCE           PUSTAK ENTERPRISES
+      1231 J S Katre  IT CODING TECHNIQUES PUSTAK ENTERPRISES
+      1232 M A RAMA   INTERNETTECHNOLOGIES PUSTAK ENTERPRISES
+      1233 Mahesh M   CLOUD COMPUTING      SAPNA ENTERPRISES
+      1234 PURVA R    INTELLIGENCE SYSTEM  SAPNA ENTERPRISES
+
+SQL> insert into enroll values('230953300',1700,4,1230);
+
+1 row created.
+
+SQL> insert into enroll values('230953301',1701,4,1231);
+
+1 row created.
+
+SQL> insert into enroll values('230953302',1702,4,1232);
+
+1 row created.
+
+SQL> insert into enroll values('230953303',1703,4,1233);
+
+1 row created.
+
+SQL> insert into enroll values('230953304',1704,4,1234);
+
+1 row created.
+
+SQL> select * from enroll;
+
+REGNO                    COURSE        SEM  BOOK_ISBN
+-------------------- ---------- ---------- ----------
+230953300                  1700          4       1230
+230953301                  1701          4       1231
+230953302                  1702          4       1232
+230953303                  1703          4       1233
+230953304                  1704          4       1234
+
+SQL> insert into BOOK_ADOPTION values(1700,4,1230);
+
+1 row created.
+
+SQL> insert into book_adoption values(1701,4,1231);
+
+1 row created.
+
+SQL> insert into book_adoption values(1702,4,1232);
+
+1 row created.
+
+SQL> insert into book_adoption values(1703,4,1233);
+
+1 row created.
+
+SQL> insert into book_adoption values(1704,4,1234);
+
+1 row created.
+
+SQL> select * from book_adoption;
+
+    COURSE        SEM  BOOK_ISBN
+---------- ---------- ----------
+      1700          4       1230
+      1701          4       1231
+      1702          4       1232
+      1703          4       1233
+      1704          4       1234
+
+(3)->Execute following queries on the database using nested subquery concept: 
+a. List the courses which uses more than 1 text book.
+
+SQL> select cname,count(course) as num_of_Text_Books from course natural join book_adoption group by c
+name having count(course)>1;
+
+CNAME      NUM_OF_TEXT_BOOKS
+---------- -----------------
+DBMS                       2
+
+b. List the departments whose all course text books are published by a 
+particular publisher. 
+
+SQL> select distinct dept from course where not exists(select * from text natural join book_adoption where book_adoption.course=course.course and publisher='sapna enterprises');
+
+DEPT
+----------
+MECH
+ENI
+ICT
+
+c.Find  the  students  who  have  enrolled  for  course  of  more  than  one department 
+
+SQL> insert into enroll values('230953300',1703,4,1233);
+
+1 row created.
+
+SQL> select name from student where regno in(select regno from enroll natural join course group by regno having count(distinct dept)>1);
+
+NAME
+----------
+Shreyas
+
+d. Produce a list of students who are not enrolled. 
+
+SQL> insert into student values('230953305','Saurabh','EEE','11-SEP-2003');
+
+1 row created.
+
+SQL> select regno,name from student where not exists(select regno from enroll where student.regno=enroll.regno);
+
+REGNO      NAME
+---------- ----------
+230953305  Saurabh
+
+e. List the  department  which  adopts  all  the  books from the  particular publisher. 
+
+f. List the books which are adopted by the course as well as enrolled by the student.
+
+SQL> select booktitle from text where book_isbn in ( select distinct book_isbn from book_adoption join enroll using(book_isbn));
+
+BOOKTITLE
+--------------------
+IT SCIENCE
+IT CODING TECHNIQUES
+INTERNETTECHNOLOGIES
+CLOUD COMPUTING
+INTELLIGENCE SYSTEM
+
+g. List the courses which has adapted at least two books from a specific publisher. 
+
+SQL> select course,cname from text natural join book_adoption join course using(course) where publishe
+r='PUSTAK ENTERPRISES' group by (course,cname) having count(book_isbn)>=2;
+
+    COURSE CNAME
+---------- ----------
+      1700 DBMS
+
+h. Identify the students who are enrolled for maximum number of books. 
+
+SQL> select regno,name,count(book_isbn) from enroll natural join student group by regno,name having co
+unt(book_isbn)>=all(select count(book_isbn) from enroll natural join student group by regno);
+
+REGNO      NAME       COUNT(BOOK_ISBN)
+---------- ---------- ----------------
+230953300  Shreyas                   3
+
+i.List the publishers along with the number of books published by them. 
+
+SQL> select publisher,count(book_isbn) from text group by publisher;
+
+PUBLISHER            COUNT(BOOK_ISBN)
+-------------------- ----------------
+SAPNA ENTERPRISES                   2
+PUSTAK ENTERPRISES                  3
+
+j. List the students who enrolled for all the books adopted by their course. 
+
+SQL> select distinct regno from enroll natural join student where exists(select book_isbn from book_adoption where book_adoption.course=enroll.course);
+
+REGNO
+--------------------
+230953304
+230953301
+230953302
+230953303
+230953300
