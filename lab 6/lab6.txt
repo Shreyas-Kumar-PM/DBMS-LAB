@@ -1,0 +1,140 @@
+(1)->Create a function to return total number of accidents happened in a particular year. 
+
+ create or replace function total_accd
+  2      (year in int)
+  3      return int
+  4      as
+  5      total int;
+  6      begin
+  7      select count(report_number)
+  8      into total
+  9      from accident
+ 10      where extract(year from accd_date)=year;
+ 11      return total;
+ 12      end;
+ 13      /
+
+Function created.
+
+SQL> select total_accd(2024) from dual;
+
+TOTAL_ACCD(2024)
+----------------
+               2
+
+(2)-> Create a procedure to display total damage caused due to an accident for a particular 
+driver on a specific year. 
+
+set serveroutput on
+CREATE OR REPLACE PROCEDURE tot_damage
+    (driver IN VARCHAR2, year IN NUMBER) IS
+    damage NUMBER := 0;
+BEGIN
+    SELECT NVL(SUM(pa.DAMAGE_AMOUNT), 0) INTO damage
+    FROM participated pa
+    JOIN accident ac ON pa.REPORT_NUMBER = ac.REPORT_NUMBER
+    WHERE pa.DRIVER_ID = driver
+      AND EXTRACT(YEAR FROM ac.ACCD_DATE) = year;
+
+    DBMS_OUTPUT.PUT_LINE('Total damage: ' || damage);
+EXCEPTION
+    WHEN NO_DATA_FOUND THEN
+        DBMS_OUTPUT.PUT_LINE('No data found for the given driver and year.');
+    WHEN OTHERS THEN
+        DBMS_OUTPUT.PUT_LINE('An error occurred: ' || SQLERRM);
+END;
+/
+
+SQL> execute tot_damage('230953300',2025);
+Total damage: 50000
+PL/SQL procedure successfully completed.
+
+
+(3)->Create a procedure to display accident information which took place in a particular 
+location. 
+
+SQL>set serveroutput on 
+CREATE OR REPLACE PROCEDURE accident_info(location_value IN VARCHAR2) IS
+  2  BEGIN
+  3      FOR accident_rec IN
+  4      (SELECT * FROM accident WHERE LOCATION = location_value) LOOP
+  5          DBMS_OUTPUT.PUT_LINE('Report Number: ' || accident_rec.REPORT_NUMBER ||
+  6                               ', Date: ' || TO_CHAR(accident_rec.ACCD_DATE, 'DD-MON-YYYY') ||
+  7                               ', Location: ' || accident_rec.LOCATION);
+  8      END LOOP;
+  9  END;
+ 10  /
+
+Procedure created
+
+SQL> execute accident_info('chennai');
+Report Number: 20034, Date: 11-JAN-23, Location: chennai
+PL/SQL procedure successfully completed.
+
+
+(4)-> create a procedure to identify all drivers who have never been involved in any 
+accidents. The procedure should return their driver-id, name, and address 
+
+SQL> set serveroutput on
+SQL> CREATE OR REPLACE PROCEDURE GetDriversWithoutAccidents AS
+  2  BEGIN
+  3      FOR rec IN (
+  4          SELECT p.driver_id, p.name, p.address
+  5          FROM person p
+  6          LEFT JOIN participated pa ON p.driver_id = pa.driver_id
+  7          WHERE pa.report_number IS NULL
+  8      ) LOOP
+  9          DBMS_OUTPUT.PUT_LINE('driver id: ' || rec.driver_id ||
+ 10                               ', name: ' || rec.name ||
+ 11                               ', address: ' || rec.address);
+ 12      END LOOP;
+ 13  END;
+ 14  /
+
+Procedure created.
+
+SQL> execute GetDriversWithoutAccidents;
+driver id: 230953302, name: Rajesh, address: Chennai
+driver id: 230953303, name: Vishesh, address: Calicut
+
+PL/SQL procedure successfully completed.
+
+(5)->write a function that takes a license as input and returns the total number of 
+accidents in which the car was involved 
+
+SQL> CREATE OR REPLACE FUNCTION gettotalaccidentsbyregno(p_regno IN VARCHAR2)
+  2  RETURN NUMBER
+  3  IS
+  4      v_total_accidents NUMBER := 0; -- Initialize to 0
+  5  BEGIN
+  6      SELECT COUNT(*)
+  7      INTO v_total_accidents
+  8      FROM participated
+  9      WHERE REGNO = p_regno;
+ 10
+ 11      RETURN v_total_accidents;
+ 12  EXCEPTION
+ 13      WHEN OTHERS THEN
+ 14          RETURN 0; -- Return 0 for any error
+ 15  END;
+ 16  /
+
+Function created.
+
+SQL> select GetTotalAccidentsByRegno('TN013B1975') as Total_Accidents from dual;
+
+TOTAL_ACCIDENTS
+---------------
+              1
+
+SQL> select c.REGNO, GetTotalAccidentsByRegno(c.REGNO) as Total_Accidents from car c;
+
+REGNO      TOTAL_ACCIDENTS
+---------- ---------------
+PY013B2000               0
+PY013B2002               1
+TN013B1975               1
+TN013B2000               0
+TN013B2004               3
+
+
